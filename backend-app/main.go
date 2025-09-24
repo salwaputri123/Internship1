@@ -29,6 +29,8 @@ func main() {
 	r.POST("/api/auth/login", handlers.Login) // login semua role
 	r.POST("/api/users", handlers.CreateUser) // tambah user superadmin
 	r.GET("/api/users", handlers.GetUsers)    // ambil semua user
+	r.PUT("/api/users/:id", handlers.UpdateUser) // update user
+	r.DELETE("/api/users/:id", handlers.DeleteUser) //hapus user
 
 	port := os.Getenv("PORT")
 	if port == "" {

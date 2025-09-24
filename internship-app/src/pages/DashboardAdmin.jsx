@@ -22,7 +22,7 @@ export default function DashboardAdmin() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
-  // ==== Ambil data user ====
+  // ===== Ambil data awal =====
   useEffect(() => {
     if (!token) return;
     fetch("http://localhost:5000/api/users", {
@@ -40,9 +40,15 @@ export default function DashboardAdmin() {
       .catch(() => alert("Gagal mengambil data users"));
   }, [token]);
 
-  // ==== Tambah / Update user ====
+  // ===== Tambah / Update user =====
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const confirmSave = window.confirm(
+      "Apakah Anda yakin ingin menyimpan user ini?"
+    );
+    if (!confirmSave) return;
+
     const method = editUser ? "PUT" : "POST";
     const url = editUser
       ? `http://localhost:5000/api/users/${editUser.id}`
@@ -62,13 +68,28 @@ export default function DashboardAdmin() {
       })
       .then((data) => {
         if (editUser) {
-          // update list
+          // ==== UPDATE USER ====
           setUsers((prev) =>
             prev.map((u) => (u.id === editUser.id ? data.user : u))
           );
+
+          // cek apakah role berubah
+          if (editUser.role !== formUser.role) {
+            setStats((prev) => ({
+              ...prev,
+              [editUser.role]: prev[editUser.role] - 1,
+              [formUser.role]: prev[formUser.role] + 1,
+            }));
+          }
         } else {
+          // ==== TAMBAH USER BARU ====
           setUsers((prev) => [...prev, data.user]);
+          setStats((prev) => ({
+            ...prev,
+            [formUser.role]: prev[formUser.role] + 1,
+          }));
         }
+
         setShowModal(false);
         setEditUser(null);
         setFormUser({ name: "", email: "", password: "", role: "manager" });
@@ -76,14 +97,14 @@ export default function DashboardAdmin() {
       .catch(() => alert("Gagal menyimpan user"));
   };
 
-  // ==== Edit user ====
+  // ===== Edit user =====
   const handleEditUser = (user) => {
     setEditUser(user);
     setFormUser({ ...user, password: "" });
     setShowModal(true);
   };
 
-  // ==== Delete user ====
+  // ===== Delete user =====
   const handleDeleteUser = (user) => {
     const confirmDelete = window.confirm(
       `Apakah Anda yakin ingin menghapus user "${user.name}"?`
@@ -97,6 +118,11 @@ export default function DashboardAdmin() {
       .then((res) => {
         if (!res.ok) throw new Error("Gagal menghapus user");
         setUsers((prev) => prev.filter((u) => u.id !== user.id));
+        // update jumlah card langsung
+        setStats((prev) => ({
+          ...prev,
+          [user.role]: prev[user.role] - 1,
+        }));
       })
       .catch(() => alert("Gagal menghapus user"));
   };
@@ -163,7 +189,11 @@ export default function DashboardAdmin() {
                   <td>{u.name}</td>
                   <td>{u.email}</td>
                   <td className="capitalize">{u.role}</td>
-                  <td>{new Date(u.created_at).toLocaleDateString()}</td>
+                  <td>
+                    {u.created_at
+                      ? new Date(u.created_at).toLocaleDateString("id-ID")
+                      : "-"}
+                  </td>
                   <td className="action-col">
                     <button
                       className="icon-btn edit"
@@ -173,7 +203,7 @@ export default function DashboardAdmin() {
                     </button>
                     <button
                       className="icon-btn delete"
-                      onClick={() => handleDeleteUser(u.id)}
+                      onClick={() => handleDeleteUser(u)}
                     >
                       <i className="fas fa-trash"></i>
                     </button>
