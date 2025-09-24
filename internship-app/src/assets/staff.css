@@ -1,0 +1,204 @@
+.dashboard-staff {
+  padding: 20px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* ===== Header ===== */
+.header-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  background: linear-gradient(90deg, #007bff, #00c6ff);
+  padding: 15px 20px;
+  color: white;
+  border-radius: 8px;
+}
+
+.header-bar .title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.logout-btn {
+  background-color: #ff4d4f;
+  border: none;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logout-btn i {
+  font-size: 16px;
+}
+
+/* ===== User Info ===== */
+.user-info {
+  margin-bottom: 20px;
+}
+
+.user-info h2 {
+  font-size: 20px;
+  color: #333;
+}
+
+/* ===== Cards ===== */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.card {
+  padding: 15px 20px;
+  border-radius: 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.2s;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.card i {
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: #fff; /* ikon selalu putih */
+}
+
+.card:hover {
+  transform: translateY(-3px);
+}
+
+/* Background berbeda per jenis card */
+.card.tasks { 
+  background-color: #007bff; /* biru */
+}
+.card.leaves { 
+  background-color: #28a745; /* hijau */
+}
+.card.notifications { 
+  background-color: #17a2b8; /* cyan */
+}
+
+/* Card text */
+.card-value {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.card-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff; /* label tetap putih */
+}
+
+/* ===== Staff Sections ===== */
+.staff-section {
+  background-color: white;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.staff-section h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: #007bff;
+  font-size: 18px;
+}
+
+/* Tables */
+.tasks-table,
+.leave-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.tasks-table th,
+.tasks-table td,
+.leave-table th,
+.leave-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  font-size: 14px;
+}
+
+.tasks-table th,
+.leave-table th {
+  background-color: #f0f2f5;
+}
+
+/* Notifications */
+.notifications-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.notifications-list li {
+  background-color: #e6f7ff;
+  padding: 10px 12px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  color: #0050b3;
+  font-size: 14px;
+}
+
+/* ===== Responsive / Mobile ===== */
+@media screen and (max-width: 768px) {
+  .header-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .logout-btn {
+    margin-top: 10px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .cards {
+    grid-template-columns: 1fr; /* card full width di mobile */
+  }
+
+  .card-value {
+    font-size: 20px;
+  }
+
+  .card-label {
+    font-size: 12px;
+  }
+
+  .staff-section {
+    padding: 12px;
+  }
+
+  .tasks-table th,
+  .tasks-table td,
+  .leave-table th,
+  .leave-table td {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  .user-info h2 {
+    font-size: 18px;
+  }
+}

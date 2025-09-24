@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
-import "../assets/DashboardAdmin.css";
-import { useNavigate } from "react-router-dom"; // pastikan pakai react-router
+import "../assets/admin.css";
+import { useNavigate } from "react-router-dom";
 
 export default function DashboardAdmin() {
   const [users, setUsers] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [newUser, setNewUser] = useState({
+  const [editUser, setEditUser] = useState(null);
+  const [formUser, setFormUser] = useState({
+    name: "",
     email: "",
     password: "",
     role: "manager",
@@ -18,11 +20,13 @@ export default function DashboardAdmin() {
   });
 
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
-  // Ambil data user ketika pertama kali load
+  // ==== Ambil data user ====
   useEffect(() => {
-    fetch("http://localhost:5000/api/superadmin/users", {
-      headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+    if (!token) return;
+    fetch("http://localhost:5000/api/users", {
+      headers: { Authorization: "Bearer " + token },
     })
       .then((res) => res.json())
       .then((data) => {
@@ -33,47 +37,78 @@ export default function DashboardAdmin() {
         });
         setStats(count);
       })
-      .catch(() => {});
-  }, []);
+      .catch(() => alert("Gagal mengambil data users"));
+  }, [token]);
 
-  // Tambah user baru
-  const handleAddUser = (e) => {
+  // ==== Tambah / Update user ====
+  const handleSubmit = (e) => {
     e.preventDefault();
-    fetch("http://localhost:5000/api/superadmin/users", {
-      method: "POST",
+    const method = editUser ? "PUT" : "POST";
+    const url = editUser
+      ? `http://localhost:5000/api/users/${editUser.id}`
+      : "http://localhost:5000/api/users";
+
+    fetch(url, {
+      method,
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
+        Authorization: "Bearer " + token,
       },
-      body: JSON.stringify(newUser),
+      body: JSON.stringify(formUser),
     })
       .then((res) => {
-        if (!res.ok) throw new Error("Gagal menambah user");
+        if (!res.ok) throw new Error("Gagal menyimpan user");
         return res.json();
       })
       .then((data) => {
-        setUsers((prev) => [...prev, data]);
+        if (editUser) {
+          // update list
+          setUsers((prev) =>
+            prev.map((u) => (u.id === editUser.id ? data.user : u))
+          );
+        } else {
+          setUsers((prev) => [...prev, data.user]);
+        }
         setShowModal(false);
-        setNewUser({ email: "", password: "", role: "manager" });
-
-        // update statistik
-        setStats((prev) => ({
-          ...prev,
-          [data.role]: prev[data.role] + 1,
-        }));
+        setEditUser(null);
+        setFormUser({ name: "", email: "", password: "", role: "manager" });
       })
-      .catch(() => alert("Gagal menambah user"));
+      .catch(() => alert("Gagal menyimpan user"));
   };
 
-  // Logout
+  // ==== Edit user ====
+  const handleEditUser = (user) => {
+    setEditUser(user);
+    setFormUser({ ...user, password: "" });
+    setShowModal(true);
+  };
+
+  // ==== Delete user ====
+  const handleDeleteUser = (user) => {
+    const confirmDelete = window.confirm(
+      `Apakah Anda yakin ingin menghapus user "${user.name}"?`
+    );
+    if (!confirmDelete) return;
+
+    fetch(`http://localhost:5000/api/users/${user.id}`, {
+      method: "DELETE",
+      headers: { Authorization: "Bearer " + token },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Gagal menghapus user");
+        setUsers((prev) => prev.filter((u) => u.id !== user.id));
+      })
+      .catch(() => alert("Gagal menghapus user"));
+  };
+
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
+    localStorage.clear();
+    navigate("/");
   };
 
   return (
     <div className="dashboard-admin">
-      {/* ====== Header ====== */}
+      {/* ===== Header ===== */}
       <div className="header-bar">
         <h1 className="title">Dashboard Super Admin</h1>
         <button className="logout-btn" onClick={handleLogout}>
@@ -81,31 +116,28 @@ export default function DashboardAdmin() {
         </button>
       </div>
 
-      {/* ====== Cards Summary ====== */}
+      {/* ===== Cards Summary ===== */}
       <div className="cards">
-        <div className="card">
-          <i className="fas fa-user-tie fa-2x" style={{ color: "#007bff" }}></i>
-          <div className="card-value">{stats.manager}</div>
-          <div className="card-label">Manager</div>
-        </div>
-        <div className="card">
-          <i className="fas fa-users fa-2x" style={{ color: "#28a745" }}></i>
-          <div className="card-value">{stats.hrd}</div>
-          <div className="card-label">HRD</div>
-        </div>
-        <div className="card">
-          <i className="fas fa-coins fa-2x" style={{ color: "#ffc107" }}></i>
-          <div className="card-value">{stats.finance}</div>
-          <div className="card-label">Finance</div>
-        </div>
-        <div className="card">
-          <i className="fas fa-user fa-2x" style={{ color: "#17a2b8" }}></i>
-          <div className="card-value">{stats.staff}</div>
-          <div className="card-label">Staff</div>
-        </div>
+        {["manager", "hrd", "finance", "staff"].map((r) => (
+          <div key={r} className={`card ${r}`}>
+            <i
+              className={
+                r === "manager"
+                  ? "fas fa-user-tie"
+                  : r === "hrd"
+                  ? "fas fa-users"
+                  : r === "finance"
+                  ? "fas fa-coins"
+                  : "fas fa-user"
+              }
+            ></i>
+            <div className="card-value">{stats[r]}</div>
+            <div className="card-label">{r.toUpperCase()}</div>
+          </div>
+        ))}
       </div>
 
-      {/* ====== Users Section ====== */}
+      {/* ===== Users Table ===== */}
       <div className="users-section">
         <div className="users-header">
           <h2>Data Users</h2>
@@ -118,17 +150,34 @@ export default function DashboardAdmin() {
           <table className="users-table">
             <thead>
               <tr>
+                <th>Nama</th>
                 <th>Email</th>
                 <th>Role</th>
                 <th>Tanggal Dibuat</th>
+                <th>Aksi</th>
               </tr>
             </thead>
             <tbody>
               {users.map((u) => (
                 <tr key={u.id}>
+                  <td>{u.name}</td>
                   <td>{u.email}</td>
                   <td className="capitalize">{u.role}</td>
                   <td>{new Date(u.created_at).toLocaleDateString()}</td>
+                  <td className="action-col">
+                    <button
+                      className="icon-btn edit"
+                      onClick={() => handleEditUser(u)}
+                    >
+                      <i className="fas fa-edit"></i>
+                    </button>
+                    <button
+                      className="icon-btn delete"
+                      onClick={() => handleDeleteUser(u.id)}
+                    >
+                      <i className="fas fa-trash"></i>
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -136,37 +185,45 @@ export default function DashboardAdmin() {
         </div>
       </div>
 
-      {/* ====== Modal Tambah User ====== */}
+      {/* ===== Modal Tambah / Edit ===== */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3>Tambah User Baru</h3>
-            <form className="modal-form" onSubmit={handleAddUser}>
+            <h3>{editUser ? "Edit User" : "Tambah User Baru"}</h3>
+            <form className="modal-form" onSubmit={handleSubmit}>
+              <label>Nama</label>
+              <input
+                type="text"
+                value={formUser.name}
+                onChange={(e) =>
+                  setFormUser({ ...formUser, name: e.target.value })
+                }
+                required
+              />
               <label>Email</label>
               <input
                 type="email"
-                value={newUser.email}
+                value={formUser.email}
                 onChange={(e) =>
-                  setNewUser({ ...newUser, email: e.target.value })
+                  setFormUser({ ...formUser, email: e.target.value })
                 }
                 required
               />
-
-              <label>Password</label>
+              <label>
+                Password {editUser && "(biarkan kosong jika tidak diubah)"}
+              </label>
               <input
                 type="password"
-                value={newUser.password}
+                value={formUser.password}
                 onChange={(e) =>
-                  setNewUser({ ...newUser, password: e.target.value })
+                  setFormUser({ ...formUser, password: e.target.value })
                 }
-                required
               />
-
               <label>Role</label>
               <select
-                value={newUser.role}
+                value={formUser.role}
                 onChange={(e) =>
-                  setNewUser({ ...newUser, role: e.target.value })
+                  setFormUser({ ...formUser, role: e.target.value })
                 }
               >
                 <option value="manager">Manager</option>
@@ -174,7 +231,6 @@ export default function DashboardAdmin() {
                 <option value="finance">Finance</option>
                 <option value="staff">Staff</option>
               </select>
-
               <div className="modal-actions">
                 <button type="submit" className="primary-btn">
                   Simpan
