@@ -76,3 +76,55 @@ func LoginSuperAdmin(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"token": t, "role": role})
 }
+func Login(c *gin.Context) {
+    var req struct {
+        Email    string `json:"email"`
+        Password string `json:"password"`
+    }
+
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
+        return
+    }
+
+    var id int
+    var name, hash, role string
+    err := config.DB.QueryRow(
+        "SELECT id, name, password, role FROM users WHERE email=? AND is_deleted=0",
+        req.Email,
+    ).Scan(&id, &name, &hash, &role)
+
+    if err == sql.ErrNoRows {
+        c.JSON(http.StatusUnauthorized, gin.H{"message": "User tidak ditemukan"})
+        return
+    } else if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"message": "DB error"})
+        return
+    }
+
+    if bcrypt.CompareHashAndPassword([]byte(hash), []byte(req.Password)) != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"message": "Password salah"})
+        return
+    }
+
+    claims := &Claims{
+        UserID: id,
+        Role:   role,
+        RegisteredClaims: jwt.RegisteredClaims{
+            ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+        },
+    }
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+    t, err := token.SignedString(jwtKey)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to generate token"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{
+        "token": t,
+        "role":  role,
+        "email": req.Email,
+        "name":  name,
+    })
+}

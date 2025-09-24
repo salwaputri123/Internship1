@@ -26,8 +26,9 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	// Route
-	r.POST("/api/auth/login", handlers.LoginSuperAdmin)
+	r.POST("/api/auth/login", handlers.Login) // login semua role
+	r.POST("/api/users", handlers.CreateUser) // tambah user superadmin
+	r.GET("/api/users", handlers.GetUsers)    // ambil semua user
 
 	port := os.Getenv("PORT")
 	if port == "" {
