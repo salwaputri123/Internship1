@@ -1,17 +1,12 @@
-body {
-  font-family: "Poppins", sans-serif;
-  background-color: #f5f7fa;
-  margin: 0;
-  padding: 0;
-}
-
 /* ====== Container ====== */
 .dashboard-hrd {
   padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f7fa;
   min-height: 100vh;
 }
 
-/* ===== Header ===== */
+/* ====== Header ====== */
 .header-bar {
   display: flex;
   justify-content: space-between;
@@ -44,7 +39,7 @@ body {
   background-color: #c0392b;
 }
 
-/* ===== User Info ===== */
+/* ====== User Info ====== */
 .user-info {
   margin-bottom: 20px;
 }
@@ -55,7 +50,7 @@ body {
   font-weight: 500;
 }
 
-/* ===== Cards ===== */
+/* ====== Cards Ringkasan ====== */
 .cards {
   display: flex;
   gap: 20px;
@@ -65,12 +60,12 @@ body {
 
 .cards .card {
   flex: 1;
+  min-width: 180px;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-  min-width: 180px;
-  text-align: center;
   color: white;
+  text-align: center;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -102,13 +97,24 @@ body {
 .card.finance { background-color: #ffc107; color: #2c3e50; }
 .card.staff { background-color: #17a2b8; }
 
-/* ===== Table Pengajuan Cuti ===== */
+/* ====== Table Pengajuan Cuti ====== */
 .table-section {
-  background-color: #fff;
+  background: #fff;
   padding: 20px;
   margin-bottom: 25px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.table-section h3 {
+  font-size: 18px;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.table-wrapper {
+  overflow-x: auto; /* supaya tidak rusak di layar kecil */
 }
 
 .leave-table {
@@ -134,18 +140,18 @@ body {
 }
 
 .pending {
-  color: #ffc107;
+  color: #f39c12;
   font-weight: bold;
 }
 
 .approved {
-  color: #28a745;
+  color: #27ae60;
   font-weight: bold;
 }
 
-/* ===== Notifications ===== */
+/* ====== Notifications ====== */
 .notification-section {
-  background-color: #fff;
+  background: #fff;
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
@@ -159,18 +165,20 @@ body {
 }
 
 .notification-section ul {
-  list-style-type: disc;
-  padding-left: 20px;
+  list-style-type: none;
+  padding-left: 0;
 }
 
 .notification-section li {
+  background-color: #ffeaa7;
+  padding: 10px 15px;
+  border-radius: 8px;
   margin-bottom: 8px;
-  font-size: 14px;
   color: #2d3436;
   font-weight: 500;
 }
 
-/* ===== Responsive ===== */
+/* ====== Responsiveness ====== */
 @media (max-width: 768px) {
   .header-bar {
     flex-direction: column;
@@ -211,6 +219,7 @@ body {
     font-size: 20px;
   }
 
+  .table-section h3,
   .notification-section h3 {
     font-size: 16px;
   }
