@@ -176,6 +176,7 @@ export default function DashboardAdmin() {
           <table className="users-table">
             <thead>
               <tr>
+                <th>No</th> {/* Kolom nomor */}
                 <th>Nama</th>
                 <th>Email</th>
                 <th>Role</th>
@@ -184,8 +185,9 @@ export default function DashboardAdmin() {
               </tr>
             </thead>
             <tbody>
-              {users.map((u) => (
+              {users.map((u, index) => (
                 <tr key={u.id}>
+                  <td>{index + 1}</td> {/* Nomor urut mulai dari 1 */}
                   <td>{u.name}</td>
                   <td>{u.email}</td>
                   <td className="capitalize">{u.role}</td>
